@@ -1,7 +1,9 @@
+from django.db import transaction
 from rest_framework import serializers
 from projects.models import Project, Task
 
 class ProjectSerializer(serializers.ModelSerializer):
+    tasks = serializers.SerializerMethodField(read_only=True)
     director = serializers.SerializerMethodField(read_only=True)
     assigned_to = serializers.SerializerMethodField(read_only=True)
     class Meta:
@@ -12,6 +14,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             'project_name',
             'assigned_to',
             'due_date',
+            'tasks',
         ]
         read_only_field =['project_id']
     
@@ -29,10 +32,9 @@ class ProjectSerializer(serializers.ModelSerializer):
         return ""
     
     def get_tasks(self , obj):
-        tasks = Task.objects.get(project_id=obj.project_id)
-        return str(tasks.name)   
-
-
+        tasks = Project.objects.prefetch_related('tasks').filter(project_id=obj.project_id)
+        return str(list(tasks.values('tasks__name')))
+        
 class createProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
@@ -48,6 +50,7 @@ class createProjectSerializer(serializers.ModelSerializer):
             Project.objects.create(director=obj.director)
             return obj.director
         raise ValueError("Director name is required please check Your profiles")
+    
     
     def create(self , data):
         project = Project.objects.create(
@@ -68,7 +71,7 @@ class TasksListSerializer(serializers.ModelSerializer):
             'due_date',
             'status'
         ]
-        read_only_field =['project_id']    
+        read_only_field =['director']    
        
     def get_director(self , obj):
         if obj.director is not None:

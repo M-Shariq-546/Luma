@@ -62,7 +62,7 @@ class GroupInviteSerializer(serializers.ModelSerializer):
         ]
         
     def validate_invite(self, obj):
-        email = Profile.objects.filter(email=obj.email).exists()
+        email = Profile.objects.filter(user__email=obj.email).exists()
         if email:
             return email
         else:

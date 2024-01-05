@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.contrib.auth.models import User
 from profiles.models import Profile
 from rest_framework import serializers
@@ -17,22 +18,22 @@ class UserCreationSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password':{'write_only':True}}
     def get_message(self, obj):
         return "Thank You for Registering."
-    
-    
+        
     def validate(self , data):
         pw = data.get('password')
         pw2 = data.get('password2')
         if pw != pw2:
             raise serializers.ValidationError("password Doesn't Match At All")
         return data
-    
-    def create(self , validate_data):
-        print(validate_data)
-        
+
+    @transaction.atomic()
+    def create(self , validate_data):        
         user = User.objects.create_user(
             username=validate_data.get('username'),
             email=validate_data.get('email'),
             first_name=validate_data.get('first_name'),
+            is_active=True,
+            is_staff=True
         )    
         user.set_password(validate_data.get('password'))        
         user.save()

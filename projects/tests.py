@@ -5,7 +5,7 @@ from profiles.models import Profile
 
 class userTesting(TestCase):
     def setUp(self):
-        user = user = User.objects.create(username='msdevs', first_name="MSDevs", email='msdevs@hotmail.com')
+        user = User.objects.create(username='msdevs', first_name="MSDevs", email='msdevs@hotmail.com')
         user.set_password('msdevs.11')
         user.save()
         

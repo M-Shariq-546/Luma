@@ -1,4 +1,5 @@
 from .permissions import IsOwnerOrReadOnly
+from django.db import transaction
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import (ListAPIView, 
@@ -19,6 +20,7 @@ class CreateConversationApiView(CreateAPIView):
     serializer_class = CreateConverstaionSerializers
     queryset = Conversation.objects.filter(is_active=True)
     
+    @transaction.atomic()    
     def post(self , request , *args , **kwargs):
         return self.create(request , *args , **kwargs)
 

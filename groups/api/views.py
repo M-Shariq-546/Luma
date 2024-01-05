@@ -1,3 +1,4 @@
+from django.db import transaction
 from .permissions import IsOwnerOrReadOnly
 from django.db.models import Q
 from profiles.models import Profile
@@ -22,7 +23,9 @@ class GroupInviteApiView(CreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = GroupInviteSerializer
     queryset = Members.objects.filter(is_active=True)
-
+    
+    
+    @transaction.atomic()
     def post(self, request, *args, **kwargs):
         user_email = request.data.get('email', None)
         if not user_email:
@@ -82,6 +85,7 @@ class CreateGroupApiView(CreateAPIView):
     lookup_field = 'admin'
     queryset =  Group.objects.filter(is_active=True)
     
+    @transaction.atomic()    
     def post(self , request , *args, **kwargs):
         return self.create(request , *args, **kwargs)
     
@@ -92,6 +96,7 @@ class RemoveMemberApiView(RetrieveAPIView,DestroyAPIView):
     lookup_field = 'member'
     queryset =  Members.objects.filter(is_active=True)
     
+    @transaction.atomic()
     def destroy(self , request , *args , **kwargs):
         members = Members.objects.get(member=self.kwargs['member'])
         members.is_active = False

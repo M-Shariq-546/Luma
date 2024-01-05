@@ -105,4 +105,4 @@ class MessageInboxSerializer(serializers.ModelSerializer):
         
     
     def get_queryset(self , obj):
-        return Message.objects.get(conversation_id=obj.conversation_id).order_by('-timestamp')
+        return Message.objects.select_related('conversation').get().order_by('-timestamp')#conversation_id=obj.conversation_id
